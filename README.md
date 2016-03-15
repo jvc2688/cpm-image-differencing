@@ -1,1 +1,1 @@
-# image-differencing
+# cpm-image-differencing
