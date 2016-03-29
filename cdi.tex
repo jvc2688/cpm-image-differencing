@@ -20,10 +20,10 @@
 \title{\cpm\ Difference imaging}
 \author{}
 
-\section{}
-The first attempt of difference imaging or image subtraction was made by \cite{imagesub1}.
-\cite{alard} improved the method by fitting a constant convolution kernel to match the PSFs of images .
-The current preference for difference imaging is using a varying kernel to account for the spatial variation of the PSF \citep{varyingkernel}. 
+\section{Difference imaging}
+The first attempt of difference imaging or image subtraction was made by \cite{imagesub1}, who suggested to calculate the convolution kernel by taking the ratio of the Fourier transform of a bright star.
+\cite{alard} improved the method by decomposing the kernel into three gaussians with different of variances and then fitting a constant convolution kernel to match the PSFs of images.
+The current preference for difference imaging \citep{varyingkernel} is to divide images into sub-areas and fit a varying kernel to account for the spatial variation of the PSF. This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{http://www.astro.washington.edu/users/becker/v2.0/hotpants.html}}, \project{ISIS}\footnote{\url{http://www2.iap.fr/users/alard/package.html}}.
 
 
 \clearpage
