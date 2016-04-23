@@ -1,0 +1,12 @@
+.DS_Store
+*~
+*.aux
+*.log
+*.pkl
+*.out
+*.bbl
+*.blg
+*.png
+TSWLatexianTemp*
+*.ps
+*eps-converted-to.pdf
