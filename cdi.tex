@@ -6,9 +6,13 @@
 \usepackage{url}
 \usepackage{natbib}
 
-\newcommand{\project}[1]{\textsl{#1}} 
+\newcommand{\project}[1]{\textsl{#1}}
 \newcommand{\cpm}{\project{CPM}}
+\newcommand{\cpmdiff}{\project{CPM Difference Imaging}}
+\newcommand{\kepler}{\project{Kepler}}
+\newcommand{\KTCZ}{\project{K2 Campaign 0}}
 \newcommand{\todo}[1]{\textbf{#1}}
+\newcommand{\set}[1]{\mathcal{#1}}
 
 \bibliographystyle{apj}
 \definecolor{linkcolor}{rgb}{0,0,0.5}
@@ -17,14 +21,56 @@
 
 \begin{document}
 
-\title{\cpm\ Difference imaging}
+\title{\cpm\ Difference Imaging}
 \author{}
 
+\begin{abstract}
+Difference imaging or image subtraction is a method that measures differential photometry by matching the seeings between image frames. 
+This kind of method is successful in detecting variable objects in astronomy. The challenge of the difference imaging problem is how to accurately model the difference of PSFs between two frames of image so that they can be correctly differenced. The common practice is to fit either a constant or spatially varying convolution kernel to account for the PSF difference.
+Here we present a new category of difference imaging method---the \cpmdiff, in which differences are not measured between matched images but between image frames and their models---a model only predict the systematic effects but not astronomical variability. 
+In \cpmdiff\,  each pixel is modelled by the Causal Pixel Model(\cpm) originally built for modelling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough apart such that these pixels are causally disconnected and any correlation between them are caused by the instrument effect. 
+In the paper, the method is applied to the \KTCZ\ data to show that \cpmdiff\ is able to detect the variable objects and produce good photometry in a crowded field. We believe \cpmdiff\ can be useful in astronomical findings, since variables detecting is a major problem in astronomy.
+\end{abstract}
+
 \section{Difference imaging}
-Difference imaging or image subtraction is a method that calculates difference between image frames to detect variable objects. 
+Difference imaging or image subtraction is a method developed for detecting variable objects in astronomical studies, in which the difference is measured between two images that are both positionally and photometrically matched. This kind of method is optimal for analysing variabilities in astronomical images, since the method skip the procedure of doing photometry for each individual object and comparing with a catalog but directly measure the differential photometry, which is most concerned in studying astronomical variabilities.
+The common routine of difference imaging is:
+\begin{enumerate}
+\item
+Finding a reference image, either the stack of the image frames or a frame with the best seeings.
+\item
+Registering each frames according to the reference frame.
+\item
+Matching the seeing between each frame of image and the reference frame by fitting a convolution kernel that account for the difference between PSFs of frames.
+\end{enumerate}
+The main challenge of the difference imaging problem lays in how to optimize the convolution kernel to correctly measure the difference of PSFs between two frames.
 The first attempt of difference imaging or image subtraction was made by \cite{imagesub1}, who suggested to calculate a convolution kernel by using a bright star to match different image frames, so that the images can be differenced. 
-\cite{alard} improved the method by decomposing the kernel into three gaussians with different of variances and then fitting a constant convolution kernel to match the PSFs of images.
+\cite{alard} improved the method by decomposing the kernel into three gaussians with different variances and then fitting a constant convolution kernel to match the PSFs of images.
 The current preference for difference imaging \citep{varyingkernel} is to divide images into sub-areas and fit a varying kernel to account for the spatial variation of the PSF. This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{http://www.astro.washington.edu/users/becker/v2.0/hotpants.html}}, \project{ISIS}\footnote{\url{http://www2.iap.fr/users/alard/package.html}}.
+
+\section{The Method}
+Different from the classical difference imaging method, in \cpmdiff, each pixel is modelled and the difference is measured between the model and the data. The detail of the model can be found in \cite{cpm}. Here we breifly outline the major routine of the method.
+
+In \cpmdiff, each pixel value $I_{m,n}$ of pixel m in time $t_n$ is predicted by a linear combination of pixel values $I_{m',n}$, where $m'$ is from a set of pixels $m'\in\set{M}_m$ that are on the same CCD but far away from the target pixel m.
+\begin{eqnarray}
+I_{m,n}         &=& I^{\ast}_{m,n} + e_{m,n}
+\\
+I^{\ast}_{m,n}  &=& \sum_{m'\in\set{M}_m} a_{m,m'}I_{m',n} 
+\quad,
+\end{eqnarray}
+where $I^{\ast}_{m,n}$ is the prediction (by the model) for data point $I_{m,n}$, $e_{m,n}$ is residual away from the prediction, and $a_{m,m'}$ is the parameters (linear coefficients of the prediction).
+The parameters $a_{m,m'}$ is estimated by standard $\chi^2$ minimization with an additional regularization term that penalizes large absolute values for the the coefficients $a_{m,m'}$ to avoid overfitting:
+\begin{eqnarray}
+\chi^2_{m}    &=& \sum_{n} \frac{[I_{m,n} - I^{\ast}_{m,n}]^2}{\sigma^2_{m,n}}+ \lambda_{a}\sum_{m'\in\set{M}_m}a_{m,m'}^2 
+\quad,
+\end{eqnarray}
+where the $\sigma^2_{m,n'}$ are the individual-pixel noise variances, and $\lambda_{a}$ set the strength of the regularization for parameters $a_{m,m'}$.
+
+With the modelled pixel values $I^{\ast}_{m,n}$, the difference imaging can be defined as the difference or residual between model and data:
+\begin{eqnarray}
+D_{m,n} &=& I_{m,n} - I^{\ast}_{m,n}
+\quad.
+\end{eqnarray}
 
 
 \clearpage
