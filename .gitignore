@@ -6,7 +6,6 @@
 *.out
 *.bbl
 *.blg
-*.png
 TSWLatexianTemp*
 *.ps
 *eps-converted-to.pdf
