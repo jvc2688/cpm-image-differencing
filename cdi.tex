@@ -50,8 +50,19 @@ The first attempt of difference imaging or image subtraction was made by \cite{i
 \cite{alard} improved the method by decomposing the kernel into three gaussians with different variances and then fitting a constant convolution kernel to match the PSFs of images.
 The current preference for difference imaging \citep{varyingkernel} is to divide images into sub-areas and fit a varying kernel to account for the spatial variation of the PSF. This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{http://www.astro.washington.edu/users/becker/v2.0/hotpants.html}}, \project{ISIS}\footnote{\url{http://www2.iap.fr/users/alard/package.html}}.
 
+The method proposed in this paper is different from the classical difference imaging method, in that both changes of the pointing and the PSF between images will not be measured directly, but will be considered as instrument effects that imprint similar variability on all the pixels of the image and the effects of each pixel will be modelled by a linear combination of other pixels;  the difference will not be taken between images and the reference, but will be measured between the model and the data.
+Because of these differences, the \cpmdiff\ is based on the following assumptions about the data:
+\begin{enumerate}
+\item
+There are a lot of images, so that there are enough data to train (optimize) the model.
+\item
+The images are nearly aligned at the pixel level, which ensures that pixels from different images are illuminated by the same source.
+\item
+The PSF is not dramatically changed between frames of images. Therefore the correlation between pixels remains nearly the same and can be measured by samples from different images.
+\end{enumerate}
+
 \section{The Method}
-Different from the classical difference imaging method, in \cpmdiff, each pixel is modelled and the difference is measured between the model and the data. The detail of the model can be found in \cite{cpm}. Here we breifly outline the major routine of the method.
+Different from the classical difference imaging method, in \cpmdiff, each pixel is modelled and the difference is measured between the model and the data. The detail of the model can be found in \cite{cpm}. Here we briefly outline the major routine of the method.
 
 In \cpmdiff, each pixel value $I_{m,n}$ of pixel m in time $t_n$ is predicted by a linear combination of pixel values $I_{m',n}$, where $m'$ is from a set of pixels $m'\in\set{M}_m$ that are on the same CCD but far away from the target pixel m.
 \begin{eqnarray}
@@ -96,20 +107,58 @@ D_{m,n} &=& I_{m,n} - I^{\ast}_{m,n}
 
 \begin{figure}[p]
 \begin{center}
-\includegraphics[width=0.98\textwidth]{f2a}
-\includegraphics[width=0.98\textwidth]{f2b}
-\includegraphics[width=0.98\textwidth]{f2c}
-\includegraphics[width=0.98\textwidth]{f2d}
+\includegraphics[width=0.96\textwidth]{f2a}
+\includegraphics[width=0.96\textwidth]{f2b}
+\includegraphics[width=0.96\textwidth]{f2c}
+\includegraphics[width=0.96\textwidth]{f2d}
 
 \end{center}
 \caption{
   \label{images} 
-  A $50\times50$ pixels image patch from \KTCZ. From top to the bottom,  each row shows a snapshot of a continuous time sequence.
+  A $50\times50$ pixels image patch from \KTCZ. From top to the bottom,  each row shows a snapshot from different times.
   \emph{Left:} data from \KTCZ.
   \emph{Middle:} the prediction of the \cpmdiff.
-  \emph{Right:} the difference between the data and the prediction. Most of the pixel values are around zero, except for few varible sources. which means the \cpmdiff\ can perfectly predict with the image data, while pull out the varibles.
+  \emph{Right:} the difference between the data and the prediction.
+  The pixels centered on the known variables from \cite{variables} are labeled by red boxes. 
+  Most of the pixel values are around zero, except for few varible sources. which means the \cpmdiff\ can perfectly predict with the image data, while pull out the varibles.
 }
 \end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=0.32\textwidth]{f3a}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3b}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3c}
+
+\includegraphics[width=0.32\textwidth]{f3d}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3e}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3f}
+
+\includegraphics[width=0.32\textwidth]{f3g}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3h}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3i}
+
+\includegraphics[width=0.32\textwidth]{f3j}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3k}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3l}
+\hfill
+\includegraphics[width=0.32\textwidth]{f3m}
+\end{center}
+
+\caption{
+  \label{variables} 
+  The light curves of the pixels centered on known variables from \cite{variables}, which are labeld in Fig.~\ref{images}.
+}
+\end{figure}
+
 
 \section{Discussion}
 \todo{data taken differently}
