@@ -23,15 +23,37 @@
 
 \begin{document}
 
-\title{\cpm\ Difference Imaging}
-\author{}
+\title{Pixel-level model for image differencing in variability campaigns}
+\author{%
+  Dun~Wang\altaffilmark{\ref{CCPP}},
+  David~W.~Hogg\altaffilmark{\ref{CCPP},\ref{CDS},\ref{MPIA},\ref{email}},
+  Daniel~Foreman-Mackey\altaffilmark{\ref{UW},\ref{SF}}
+  }
+\newcounter{address}
+\setcounter{address}{1}
+\altaffiltext{\theaddress}{\stepcounter{address}\label{CCPP}%
+  Center for Cosmology and Particle Physics, Department of Physics, New York University}
+\altaffiltext{\theaddress}{\stepcounter{address}\label{CDS}%
+  Center for Data Science, New York University}
+\altaffiltext{\theaddress}{\stepcounter{address}\label{MPIA}%
+  Max-Planck-Institut f\"ur Astronomie, Heidelberg, Germany}
+\altaffiltext{\theaddress}{\stepcounter{address}\label{email}%
+  To whom correspondence should be addressed; \texttt{<david.hogg@nyu.edu>}.}
+\altaffiltext{\theaddress}{\stepcounter{address}\label{UW}%
+ Astronomy Department, University of Washington, Seattle, WA 98195}
+\altaffiltext{\theaddress}{\stepcounter{address}\label{SF}%
+Sagan Fellow}
+
 
 \begin{abstract}
-Difference imaging or image subtraction is a method that measures differential photometry by matching the seeings between image frames. 
-This kind of method is successful in detecting variable objects in astronomy. The challenge of the difference imaging problem is how to accurately model the difference of PSFs between two frames of image so that they can be correctly differenced. The common practice is to fit either a constant or spatially varying convolution kernel to account for the PSF difference.
-Here we present a new category of difference imaging method---the \cpmdiff, in which differences are not measured between matched images but between image frames and their models---a model only predict the systematic effects but not astronomical variability. 
-In \cpmdiff\,  each pixel is modelled by the Causal Pixel Model(\cpm) originally built for modelling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough apart such that these pixels are causally disconnected and any correlation between them are caused by the instrument effect. 
-In the paper, the method is applied to the \KTCZ\ data to show that \cpmdiff\ is able to detect the variable objects and produce good photometry in a crowded field. We believe \cpmdiff\ can be useful in astronomical findings, since variables detecting is a major problem in astronomy.
+Difference imaging or image subtraction is a method that measures differential photometry by matching the pointings and point-spread functions (PSF) between image frames. 
+This kind of method is successful in detecting variable objects and subtracting. The challenge is to accurately model the difference of PSFs between two frames. The common practice is to fit either a constant or spatially varying convolution kernel to account for the PSF difference.
+Here we present a new category of difference imaging method---the \cpmdiff, in which differences are not measured between matched images but between image frames and a pixel-level data-driven model---a model only predict the systematic effects but not astronomical variability. 
+In \cpmdiff\ each pixel is modelled by the Causal Pixel Model (\cpm) originally built for modelling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough apart such that these pixels are causally disconnected, astrophysically. 
+In the paper, the method is applied to the \project{K2 Campaign 0 and 9} data to show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
+\cpmdiff\ produces image differences at photon-noise precision. 
+Its principal drawback is that---in its current form---it requires an imaging campaign with multiple images and fairly stable telescope pointing.
+
 \end{abstract}
 
 \section{Difference imaging}
