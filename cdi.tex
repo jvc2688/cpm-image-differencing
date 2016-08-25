@@ -66,6 +66,8 @@ Finding a reference image, either the stack of the image frames or a frame with 
 Registering each frames according to the reference frame.
 \item
 Matching the seeing between each frame of image and the reference frame by fitting a convolution kernel that account for the difference between PSFs of frames.
+\item
+Matching the mean throughput or photometric calibration of the two frames and subtraction to find sources that have varied.
 \end{enumerate}
 The main challenge of the difference imaging problem lays in how to optimize the convolution kernel to correctly measure the difference of PSFs between two frames.
 The first attempt of difference imaging or image subtraction was made by \cite{imagesub1}, who suggested to calculate a convolution kernel by using a bright star to match different image frames, so that the images can be differenced. 
@@ -78,7 +80,7 @@ Because of these differences, the \cpmdiff\ is based on the following assumption
 \item
 There are a lot of images, so that there are enough data to train (optimize) the model.
 \item
-The images are nearly aligned at the pixel level, which ensures that pixels from different images are illuminated by the same source.
+The registration be good to about or better than one PSF width; the registration must not change by many PSF widths, which ensures that pixels from different images are illuminated by the same source.
 \item
 The PSF is not dramatically changed between frames of images. Therefore the correlation between pixels remains nearly the same and can be measured by samples from different images.
 \end{enumerate}
