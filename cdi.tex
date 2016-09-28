@@ -9,6 +9,7 @@
 \newcommand{\project}[1]{\textsl{#1}}
 \newcommand{\cpm}{\project{CPM}}
 \newcommand{\cpmdiff}{\project{CPM Difference Imaging}}
+\newcommand{\class}{\project{the classical difference imaging}}
 \newcommand{\kepler}{\project{Kepler}}
 \newcommand{\KTCZ}{\project{K2 Campaign 0}}
 \newcommand{\todo}[1]{\textbf{#1}}
@@ -49,14 +50,16 @@ Sagan Fellow}
 Difference imaging or image subtraction is a method that measures differential photometry by matching the pointings and point-spread functions (PSF) between image frames. 
 This kind of method is successful in detecting variable objects and subtracting. The challenge is to accurately model the difference of PSFs between two frames. The common practice is to fit either a constant or spatially varying convolution kernel to account for the PSF difference.
 Here we present a new category of difference imaging method---the \cpmdiff, in which differences are not measured between matched images but between image frames and a pixel-level data-driven model---a model only predict the systematic effects but not astronomical variability. 
-In \cpmdiff\ each pixel is modelled by the Causal Pixel Model (\cpm) originally built for modelling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough apart such that these pixels are causally disconnected, astrophysically. 
+In \cpmdiff\ each pixel is modelled by the Causal Pixel Model (\cpm) originally built for modeling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough apart such that these pixels are causally disconnected, astrophysically. 
 In the paper, the method is applied to the \project{K2 Campaign 0 and 9} data to show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
 \cpmdiff\ produces image differences at photon-noise precision. 
 Its principal drawback is that---in its current form---it requires an imaging campaign with multiple images and fairly stable telescope pointing.
 
 \end{abstract}
 
-\section{Difference imaging}
+\section{Introduction}
+
+\subsection{Difference imaging}
 Difference imaging or image subtraction is a method developed for detecting variable objects in astronomical studies, in which the difference is measured between two images that are both positionally and photometrically matched. This kind of method is optimal for analysing variabilities in astronomical images, since the method skip the procedure of doing photometry for each individual object and comparing with a catalog but directly measure the differential photometry, which is most concerned in studying astronomical variabilities.
 The common routine of difference imaging is:
 \begin{enumerate}
@@ -72,9 +75,17 @@ Matching the mean throughput or photometric calibration of the two frames and su
 The main challenge of the difference imaging problem lays in how to optimize the convolution kernel to correctly measure the difference of PSFs between two frames.
 The first attempt of difference imaging or image subtraction was made by \cite{imagesub1}, who suggested to calculate a convolution kernel by using a bright star to match different image frames, so that the images can be differenced. 
 \cite{alard} improved the method by decomposing the kernel into three gaussians with different variances and then fitting a constant convolution kernel to match the PSFs of images.
-The current preference for difference imaging \citep{varyingkernel} is to divide images into sub-areas and fit a varying kernel to account for the spatial variation of the PSF. This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{http://www.astro.washington.edu/users/becker/v2.0/hotpants.html}}, \project{ISIS}\footnote{\url{http://www2.iap.fr/users/alard/package.html}}.
+The current preference for difference imaging \citep{varyingkernel} is to divide images into sub-areas and fit a varying kernel to account for the spatial variation of the PSF. This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{http://www.astro.washington.edu/users/becker/v2.0/hotpants.html}}, \project{ISIS}\footnote{\url{http://www2.iap.fr/users/alard/package.html}}. 
+\cite{bramich} goes even further,  in which they make the model more flexible to handle more complicated kernel by generalizing the kernel to be a discrete pixel array instead of a linear combination of basis function.  
 
-The method proposed in this paper is different from the classical difference imaging method, in that both changes of the pointing and the PSF between images will not be measured directly, but will be considered as instrument effects that imprint similar variability on all the pixels of the image and the effects of each pixel will be modelled by a linear combination of other pixels;  the difference will not be taken between images and the reference, but will be measured between the model and the data.
+\subsection{A new approach}
+As mentioned above, the difference imaging methods so far \citep{imagesub1, alard, varyingkernel, bramich} all follow the same framework and the only difference lays in how the convolution kernel is calculated, so hereafter in this paper we refer to this kind of methods as the classical difference imaging approach. 
+The method proposed in this paper is completely different from the classical approach. 
+In that there is no reference image in \cpmdiff. 
+Instead of modeling each image based on the reference image, each pixel will be modeled directly by a linear combination of the other pixels of the same image. 
+In that sense, each image is its own reference image.
+Since the model of the image is built from itself, there is no need to measure the difference of PSFs between images and thus no convolution kernel in \cpmdiff. 
+Finally, while in classical approach two images are compared to measure the difference of PSFs, many images are used altogether to learn the coefficients, which tells how pixels are related with each other.
 Because of these differences, the \cpmdiff\ is based on the following assumptions about the data:
 \begin{enumerate}
 \item
