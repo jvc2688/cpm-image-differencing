@@ -14,6 +14,7 @@
 \newcommand{\kepler}{\project{Kepler}}
 \newcommand{\KTCZ}{\project{K2 Campaign 0}}
 \newcommand{\KTCN}{\project{K2 Campaign 9}}
+\newcommand{\epic}{\project{EPIC}}
 \newcommand{\todo}[1]{\textbf{#1}}
 \newcommand{\set}[1]{\mathcal{#1}}
 
@@ -96,6 +97,7 @@ Because of these differences, the \cpmdiff\ is based on the following assumption
 There are a lot of images, so that there are enough data to train (optimize) the model.
 \item
 The registration be good to about or better than one PSF width; the registration must not change by many PSF widths, which ensures that pixels from different images are illuminated by the same source.
+\end{enumerate}
 
 Different from the classical difference imaging method, in \cpmdiff, each pixel is modelled and the difference is measured between the model and the data. 
 The detail of the model can be found in \cite{cpm}. 
@@ -160,9 +162,9 @@ After all the series of the images are generated, a flat-field is drawn from a n
 \subsection{Space-based}
 In space-based observation, the systematics are mainly caused by the pointing motion, while the PRF is relatively stable. 
 Thus the space-based mock data only includes the pointing motion and maintains the PRF unchanged.
-To illustrate how variable sources will be presented in \cpmdiff, an periodic variable star (modelled by a sine function) is injected in the image.
-Fig~\ref{space} shows three snapshot of the mock data and the \cpmdiff\ of different times. 
-The \cpm\ modelled the data perfectly that each pixel was modelled with precision close to the photon noise, except  the injected variable was still preserved in the differencing image.
+To illustrate how variable sources will be detected in \cpmdiff, an periodic variable star (modelled by a sine function) is injected in the image.
+Fig~\ref{space} shows three snapshots of the mock data and the \cpmdiff\ of different times. 
+The \cpm\ modelled the data perfectly that each pixel was modelled with precision close to the photon noise, except  the injected variable was still preserved in the difference image.
 
 
 \begin{figure}[p]
@@ -174,7 +176,7 @@ The \cpm\ modelled the data perfectly that each pixel was modelled with precisio
 \end{center}
 \caption{
   \label{space}
-  An $80\times80$ pixels mock data image patch with pointing motion. 
+  An $80\times 80$ pixel mock data image patch with pointing motion. 
   From top to the bottom,  each row shows a snapshot from different times.
   \emph{Left:} mock data image;
   \emph{Middle:} the prediction of the \cpmdiff;
@@ -184,11 +186,11 @@ The \cpm\ modelled the data perfectly that each pixel was modelled with precisio
 \end{figure}
 
 \subsection{Ground-based}
-In ground-based observation, apart from pointing motion, weather changes will also affect PRF dramtically. 
+In ground-based observation, apart from pointing motion, weather changes and atmosphere distortion will also affect PRF dramtically. 
 Therefore the PRF variation was also included in the mock data.
-Fig~\ref{ground} shows three snapshot of the mock data and the \cpmdiff\ of different times. 
+Fig~\ref{ground} shows the same mock data as in space-based test, but with PRF variation included.  
 Again as the space-based test,  the \cpmdiff\ was able to model both pointing motion and PRF variation, while still pulled out the variable star in the differencing image.
-This experiment confirms that \cpmdiff\ can handle both 
+This experiment further confirms that \cpmdiff\ can calibrate both space-based and ground-based data.
 
 \begin{figure}[p]
 \begin{center}
@@ -199,7 +201,7 @@ This experiment confirms that \cpmdiff\ can handle both
 \end{center}
 \caption{
   \label{ground}
-  An $80\times80$ pixels mock data image patch with both pointing motion and PRF variation. From top to the bottom,  each row shows a snapshot from different times.
+  An $80\times 80$ pixel mock data image patch with both pointing motion and PRF variation. From top to the bottom,  each row shows a snapshot from different times.
   \emph{Left:} mock data image;
   \emph{Middle:} the prediction of the \cpmdiff;
   \emph{Right:} the relative difference between the data and the prediction, the color bar shows the relative difference;
@@ -208,6 +210,15 @@ This experiment confirms that \cpmdiff\ can handle both
 \end{figure}
 
 \subsection{\KTCN}
+Now we test our method on a $64\times50$ pixel patch (\epic\ 200069960) from \KTCN\footnote{\url{https://keplerscience.arc.nasa.gov/k2-c9.html}}, which was dedicated to a study of gravitational microlensing events.
+This data set is an ideal test bed for difference imaging, since it observed a super crowded field near the bulge, where high precision photometry is hard to be achieved directly.
+
+Fig~\ref{k2c9} shows three snapshots of the data and the \cpmdiff\ of different times.
+Constant sources in the dense field was almost all cancelled with the \cpm\ prediction, while variables (located at the red box) were preserved and can even be picked by eye from the difference image.
+
+Variable sources were detected with the variation map (mean of absolute normalized deviations of the difference image). 
+Light curves of six variable sources with highest signal to noise ratio is presented in Fig~\ref{lightcurve} as examples. 
+Each light curve was constructed with simple aperture photometry, by co-adding all the difference flux within a $3 \times 3$ aperture.
 
 \begin{figure}[p]
 \begin{center}
@@ -218,38 +229,36 @@ This experiment confirms that \cpmdiff\ can handle both
 \end{center}
 \caption{
   \label{k2c9}
-  A $80\times80$ pixels mock data image patch with both pointing motion and PRF variation. From top to the bottom,  each row shows a snapshot from different times.
-  \emph{Left:} mock data image;
+  A $64\times 50$ pixel image patch from \KTCN\ (\epic\ 200069960). From top to the bottom,  each row shows a snapshot from different times.
+  \emph{Left:} data image;
   \emph{Middle:} the prediction of the \cpmdiff;
-  \emph{Right:} the difference between the data and the prediction; 
-  Most of the pixel values are around zero, except for the varible source (upper-left corner), which means the \cpmdiff\ can perfectly predict with the image data, while pull out the varibles.
+  \emph{Right:} the difference between the data and the prediction, red boxes indicates detected variable sources.  
+  The \cpmdiff\ subtracted all the constant sources in the data image, while preserve the variable sources in the difference image.
+}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=0.48\textwidth]{f4a}
+\includegraphics[width=0.48\textwidth]{f4b}
+\includegraphics[width=0.48\textwidth]{f4c}
+\includegraphics[width=0.48\textwidth]{f4d}
+\includegraphics[width=0.48\textwidth]{f4e}
+\includegraphics[width=0.48\textwidth]{f4f}
+\end{center}
+\caption{
+  \label{lightcurve}
+  Six light curves extracted from \KTCN\ \epic\ 200069960 by \cpmdiff. 
+  Each light curve was generated by co-adding all the difference flux within a $3\times 3$ aperature.
 }
 \end{figure}
 
 
 \subsection{Large variation}
-In previous sections,  \cpmdiff\ 
-we want to push to limitation to study 
+In previous sections,  \cpmdiff\ was proved on both mock and real data that the method is able to 
+In this section, we want to push variations to the limitation of \cpmdiff.
 
 with dramatic PRF variation
-
-
-\begin{figure}[p]
-\begin{center}
-\includegraphics[width=0.95\textwidth]{f4a}
-\includegraphics[width=0.95\textwidth]{f4b}
-\includegraphics[width=0.95\textwidth]{f4c}
-%\includegraphics[width=0.95\textwidth]{f4d}
-\end{center}
-\caption{
-  \label{large_motion}
-  A $80\times80$ pixels mock data image patch with  pointing motion variation. From top to the bottom,  each row shows a snapshot from different times.
-  \emph{Left:} mock data image;
-  \emph{Middle:} the prediction of the \cpmdiff;
-  \emph{Right:} the difference between the data and the prediction; 
-  Most of the pixel values are around zero, except for the varible source (upper-left corner), which means the \cpmdiff\ can perfectly predict with the image data, while pull out the varibles.
-}
-\end{figure}
 
 
 \begin{figure}[p]
@@ -260,12 +269,29 @@ with dramatic PRF variation
 %\includegraphics[width=0.95\textwidth]{f4d}
 \end{center}
 \caption{
-  \label{large_rotation}
-  A $80\times80$ pixels mock data image patch with both pointing motion and PRF variation. From top to the bottom,  each row shows a snapshot from different times.
+  \label{large_motion}
+  A $80\times 80$ pixel mock data image patch with overall translation up to 10 pixels. From top to the bottom,  each row shows a snapshot from different times.
   \emph{Left:} mock data image;
   \emph{Middle:} the prediction of the \cpmdiff;
-  \emph{Right:} the difference between the data and the prediction; 
-  Most of the pixel values are around zero, except for the varible source (upper-left corner), which means the \cpmdiff\ can perfectly predict with the image data, while pull out the varibles.
+  \emph{Right:} the relative difference between the data and the prediction; 
+}
+\end{figure}
+
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{f6a}
+\includegraphics[width=0.95\textwidth]{f6b}
+\includegraphics[width=0.95\textwidth]{f6c}
+%\includegraphics[width=0.95\textwidth]{f4d}
+\end{center}
+\caption{
+  \label{large_rotation}
+  A $80\times 80$ pixel mock data image patch with rotation up to 20 deg. 
+  From top to the bottom, each row shows a snapshot from different times.
+  \emph{Left:} mock data image;
+  \emph{Middle:} the prediction of the \cpmdiff;
+  \emph{Right:} the relative difference between the data and the prediction;   
 }
 \end{figure}
 
