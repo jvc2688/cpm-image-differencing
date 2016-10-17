@@ -88,10 +88,10 @@ In that there is no reference image in \cpmdiff.
 Instead of modeling each image based on the reference image, each pixel will be modeled directly by a linear combination of the other pixels of the same image. 
 In that sense, each image is its own reference image.
 Since the model of the image is built from itself, there is no need to measure the difference of PSFs between images and thus no convolution kernel in \cpmdiff. 
-Finally, while in classical approach two images are compared to measure the difference of PSFs, many images are used altogether to learn the coefficients, which tells how pixels are related with each other.
+Finally, while in classical approach only two images are compared with each other to measure the difference of PSFs, in \cpmdiff many images are used altogether to learn the coefficients, which tells how pixels are related with each other.
 
 \section{The Method}
-Because of these differences, the \cpmdiff\ is based on the following assumptions about the data:
+Due to the the differences between \cpmdiff\ and the classical approach, the method is based on the following assumptions about the data:
 \begin{enumerate}
 \item
 There are a lot of images, so that there are enough data to train (optimize) the model.
@@ -125,7 +125,10 @@ D_{m,n} &=& I_{m,n} - I^{\ast}_{m,n}
 \end{eqnarray}
 
 \section{Experiements}
-In order to illustrate how \cpmdiff\ performs, here we present several experiments test under different observation conditions (space-based and ground-based) with mock data. In addition, 
+In order to illustrate how \cpmdiff\ performs, here we present several experiments both on mock and real data. 
+First, \cpmdiff\ is tested under different observation conditions (space-based and ground-based) with mock data. 
+Then,  the method is appalled to the \KTCN\ data to show how it performs with the real data. 
+In the end of this section,  large variations of pointing and PSF are tested with mock data to study the limitation of \cpmdiff.
 
 \subsection{Mock data}
 To produce the mock data, TRILEGAL \footnote{\url{http://stev.oapd.inaf.it/cgi-bin/trilegal}} is used to generate a catalog of the stars with magnitudes. 
@@ -160,8 +163,9 @@ Here a 2-d gaussian $PRF(\Delta x, \Delta y) = A exp(a\Delta x^2-b\Delta x \Delt
 After all the series of the images are generated, a flat-field is drawn from a normal distribution with $\mu=1, \sigma=0.01$ to account for the inter-pixel variation of the detector and photon noise is also added to each individual pixel.
 
 \subsection{Space-based}
-In space-based observation, the systematics are mainly caused by the pointing motion, while the PRF is relatively stable. 
-Thus the space-based mock data only includes the pointing motion and maintains the PRF unchanged.
+In space-based observation, the systematics are mainly caused by the pointing motion and rotation of the CCD, while the PSF is relatively stable. 
+Thus the space-based mock data only includes the pointing motion and rotation, but maintains the PSF unchanged.
+In this experiment, the pointing motion is restricted within one pixel and the rotation is restricted within 0.5 deg with respective to the center of the image.  
 To illustrate how variable sources will be detected in \cpmdiff, an periodic variable star (modelled by a sine function) is injected in the image.
 Fig~\ref{space} shows three snapshots of the mock data and the \cpmdiff\ of different times. 
 The \cpm\ modelled the data perfectly that each pixel was modelled with precision close to the photon noise, except  the injected variable was still preserved in the difference image.
@@ -186,8 +190,11 @@ The \cpm\ modelled the data perfectly that each pixel was modelled with precisio
 \end{figure}
 
 \subsection{Ground-based}
-In ground-based observation, apart from pointing motion, weather changes and atmosphere distortion will also affect PRF dramtically. 
-Therefore the PRF variation was also included in the mock data.
+In ground-based observation, apart from pointing motion, weather changes and atmosphere distortion will also affect PSF dramatically. 
+Therefore the PSF variation was also included in the mock data. 
+The pointing motion and rotation of the mock data are same as in the space-based test.
+Variation of the PSF is achieved by varying the parameters in a 2-d gaussian PRF function: $PRF(\Delta x, \Delta y) = A exp(a\Delta x^2-b\Delta x \Delta y+c\Delta y^2)$.
+The full width half maximum in both direction are restricted between 2 to 4 pixels.
 Fig~\ref{ground} shows the same mock data as in space-based test, but with PRF variation included.  
 Again as the space-based test,  the \cpmdiff\ was able to model both pointing motion and PRF variation, while still pulled out the variable star in the differencing image.
 This experiment further confirms that \cpmdiff\ can calibrate both space-based and ground-based data.
@@ -214,8 +221,7 @@ Now we test our method on a $64\times50$ pixel patch (\epic\ 200069960) from \KT
 This data set is an ideal test bed for difference imaging, since it observed a super crowded field near the bulge, where high precision photometry is hard to be achieved directly.
 
 Fig~\ref{k2c9} shows three snapshots of the data and the \cpmdiff\ of different times.
-Constant sources in the dense field was almost all cancelled with the \cpm\ prediction, while variables (located at the red box) were preserved and can even be picked by eye from the difference image.
-
+Constant sources in the dense field were almost all cancelled with the \cpm\ prediction, while variables (located at the red box) were preserved and can even be picked by eye from the difference image.
 Variable sources were detected with the variation map (mean of absolute normalized deviations of the difference image). 
 Light curves of six variable sources with highest signal to noise ratio is presented in Fig~\ref{lightcurve} as examples. 
 Each light curve was constructed with simple aperture photometry, by co-adding all the difference flux within a $3 \times 3$ aperture.
@@ -254,12 +260,20 @@ Each light curve was constructed with simple aperture photometry, by co-adding a
 \end{figure}
 
 
-\subsection{Large variation}
-In previous sections,  \cpmdiff\ was proved on both mock and real data that the method is able to 
-In this section, we want to push variations to the limitation of \cpmdiff.
+\subsection{Limitation of \cpmdiff}
+In previous sections,  \cpmdiff\ was proved on both mock and real data that the method is able to model both pointing motion and PSF variations, with which variable sources detection and photometry can be achieved.
+In this section, we want to push these variations to the limitation of \cpmdiff\ to define the scope of application of the method. Three experiments are conducted with large variations in pointing, roll and PSF.
 
-with dramatic PRF variation
-
+First, overall translation up to 10 pixels was applied to the mock data to simulate the huge pointing motion.   
+Fig~\ref{large_rotation} shows that with large pointing motion, there is sudden jump in pixel value between image frames. 
+The quality of the difference image degrades dramatically around relatively bright sources, because of the additional variabilities introduced by the motion of bright sources.
+In addition,  the variable source flux also distributes in a large range of pixels due to the pointing motion, which increase the difficulties of photometric measurement.
+With the same data set, in Fig~\ref{large_rotation}, the image was rotated with respect to the center up to 20 deg. 
+The corner of the difference image contains large variability, since the images are worse aligned in the corner due to the rotation. 
+These two test confirms the assumption that the \cpmdiff\ needs to be applied to the data set with relatively good registration.
+In Fig~\ref{large_prf}, dramatic PSF variation was introduced into the mock data.
+The \cpmdiff\ is able to subtract most of the constant sources even with large PSF variation. 
+However with PSF varying, the distribution of the variable source flux (upper-right corner) keep changing, which makes it hard to define optimal aperture to achieve high precision photometry. 
 
 \begin{figure}[p]
 \begin{center}
@@ -270,10 +284,11 @@ with dramatic PRF variation
 \end{center}
 \caption{
   \label{large_motion}
-  A $80\times 80$ pixel mock data image patch with overall translation up to 10 pixels. From top to the bottom,  each row shows a snapshot from different times.
+  An $80\times 80$ pixel mock data image patch with overall translation up to 10 pixels. From top to the bottom,  each row shows a snapshot from different times.
   \emph{Left:} mock data image;
   \emph{Middle:} the prediction of the \cpmdiff;
   \emph{Right:} the relative difference between the data and the prediction; 
+  Additional variabilities are introduced into the difference image by motion of bright sources.
 }
 \end{figure}
 
@@ -287,11 +302,31 @@ with dramatic PRF variation
 \end{center}
 \caption{
   \label{large_rotation}
-  A $80\times 80$ pixel mock data image patch with rotation up to 20 deg. 
+  An $80\times 80$ pixel mock data image patch with rotation up to 20 deg. 
   From top to the bottom, each row shows a snapshot from different times.
   \emph{Left:} mock data image;
   \emph{Middle:} the prediction of the \cpmdiff;
-  \emph{Right:} the relative difference between the data and the prediction;   
+  \emph{Right:} the relative difference between the data and the prediction;
+  The quality of the difference image drops dramtically in the corner due to the rotaion.   
+}
+\end{figure}
+
+\begin{figure}[p]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{f7a}
+\includegraphics[width=0.95\textwidth]{f7b}
+\includegraphics[width=0.95\textwidth]{f7c}
+%\includegraphics[width=0.95\textwidth]{f4d}
+\end{center}
+\caption{
+  \label{large_prf}
+  An $80\times 80$ pixel mock data image patch with large PSF variation. 
+  From top to the bottom, each row shows a snapshot from different times.
+  \emph{Left:} mock data image;
+  \emph{Middle:} the prediction of the \cpmdiff;
+  \emph{Right:} the relative difference between the data and the prediction;  
+  \cpmdiff\ is able to subtract images with huge PSF variation. 
+  However the distribution of the varible source flux also changes dramtically with the PSF variation, which increase difficulty to achieve high precision photomerty.
 }
 \end{figure}
 
