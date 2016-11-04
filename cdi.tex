@@ -57,7 +57,7 @@ Difference imaging or image subtraction is a method that measures differential p
 This kind of method is successful in detecting variable objects and subtracting. The challenge is to accurately model the difference of PSFs between two frames. The common practice is to fit either a constant or spatially varying convolution kernel to account for the PSF difference.
 Here we present a new category of difference imaging method---the \cpmdiff, in which differences are not measured between matched images but between image frames and a pixel-level data-driven model---a model only predict the systematic effects but not astronomical variability. 
 In \cpmdiff\ each pixel is modelled by the Causal Pixel Model (\cpm) originally built for modeling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough apart such that these pixels are causally disconnected, astrophysically. 
-In the paper, the method is applied to the \project{K2 Campaign 0 and 9} data to show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
+In the paper, the method is applied to the \project{K2 Campaign 9} data to show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
 \cpmdiff\ produces image differences at photon-noise precision. 
 Its principal drawback is that---in its current form---it requires an imaging campaign with multiple images and fairly stable telescope pointing.
 
@@ -114,7 +114,7 @@ I^{\ast}_{m,n}  &=& \sum_{m'\in\set{M}_m} a_{m,m'}I_{m',n}
 \quad,
 \end{eqnarray}
 where $I^{\ast}_{m,n}$ is the prediction (by the model) for data point $I_{m,n}$, $e_{m,n}$ is residual away from the prediction, and $a_{m,m'}$ is the parameters (linear coefficients of the prediction).
-The parameters $a_{m,m'}$ is estimated by standard $\chi^2$ minimization with an additional regularization term that penalizes large absolute values for the the coefficients $a_{m,m'}$ to avoid overfitting:
+The parameters $a_{m,m'}$ are estimated by standard $\chi^2$ minimization with an additional regularization term that penalizes large absolute values for the the coefficients $a_{m,m'}$ to avoid overfitting:
 \begin{eqnarray}
 \chi^2_{m}    &=& \sum_{n} \frac{[I_{m,n} - I^{\ast}_{m,n}]^2}{\sigma^2_{m,n}}+ \lambda_{a}\sum_{m'\in\set{M}_m}a_{m,m'}^2 
 \quad,
@@ -161,9 +161,9 @@ p_{r,s} &=& \sum_{i}^{N} PRF(r-x_i, s-y_i) f_i\\
 \end{eqnarray}
 where $(x_i,y_i)$ is the coordinate of the star i on the image and $f_i$ is the flux associated with that star. 
 $PRF(\Delta x, \Delta y)$ is the pixel response function (or pixel convolved point spread function). 
-Here a 2-d gaussian $PRF(\Delta x, \Delta y) = A exp(a\Delta x^2-b\Delta x \Delta y+c\Delta y^2)$ is used and parameter a,b,c is tuned to change the shape and width of the PRF.
+Here a 2-d gaussian $PRF(\Delta x, \Delta y) = A \exp(a\Delta x^2-b\Delta x \Delta y+c\Delta y^2)$ is used and parameter a,b,c is tuned to change the shape and width of the PRF.
 
-After all the series of the images are generated, a flat-field is drawn from a normal distribution with $\mu=1, \sigma=0.01$ to account for the inter-pixel variation of the detector and photon noise is also added to each individual pixel.
+After all the series of the images are generated, a flat-field uncertainty is drawn from a normal distribution with $\mu=1, \sigma=0.01$ to account for the inter-pixel variation of the detector and photon noise is also added to each individual pixel.
 
 \subsection{Space-based}
 In space-based observation, the systematics are mainly caused by the pointing motion and rotation of the CCD, while the PSF is relatively stable. 
