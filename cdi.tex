@@ -27,7 +27,7 @@
 
 \begin{document}
 
-\title{Pixel-level model for image differencing in variability campaigns}
+\title{A Pixel-level model for event discovery in time-domain imaging}
 \author{%
   Dun~Wang\altaffilmark{\ref{CCPP}},
   David~W.~Hogg\altaffilmark{\ref{CCPP},\ref{CDS},\ref{MPIA},\ref{email}},
@@ -54,12 +54,12 @@ Sagan Fellow}
 
 \begin{abstract}
 Difference imaging or image subtraction is a method that measures differential photometry by matching the pointings and point-spread functions (PSF) between image frames. 
-This kind of method is successful in detecting variable objects and subtracting. The challenge is to accurately model the difference of PSFs between two frames. The common practice is to fit either a constant or spatially varying convolution kernel to account for the PSF difference.
-Here we present a new category of difference imaging method---the \cpmdiff, in which differences are not measured between matched images but between image frames and a pixel-level data-driven model---a model only predict the systematic effects but not astronomical variability. 
+It has been successful in detecting variable objects and subtracting. The challenge is to accurately model the difference of PSFs between two frames. The common practice is to fit convolution kernels to account for PSF differences.
+Here we present a new category of method---\cpmdiff, in which differences are not measured between matched images but instead between image frames and a data-driven model---a model designed to only predict the systematic effects but not astronomical variability. 
 In \cpmdiff\ each pixel is modelled by the Causal Pixel Model (\cpm) originally built for modeling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough apart such that these pixels are causally disconnected, astrophysically. 
-In the paper, the method is applied to the \project{K2 Campaign 9} data to show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
-\cpmdiff\ produces image differences at photon-noise precision. 
-Its principal drawback is that---in its current form---it requires an imaging campaign with multiple images and fairly stable telescope pointing.
+The method is applied to  simulated data and also the \project{K2 Campaign 9} data to show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
+\cpmdiff\ produces image differences at nearly photon-noise precision. 
+Its principal drawback is that---in its current form---it requires an imaging campaign with many epochs and fairly stable telescope pointing.
 
 \end{abstract}
 
