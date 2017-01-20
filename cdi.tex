@@ -27,10 +27,10 @@
 
 \begin{document}
 
-\title{A Pixel-level model for event discovery in time-domain imaging}
+\title{A pixel-level model for event discovery in time-domain imaging}
 \author{%
-  Dun~Wang\altaffilmark{\ref{CCPP}},
-  David~W.~Hogg\altaffilmark{\ref{CCPP},\ref{CDS},\ref{MPIA},\ref{email}},
+  Dun~Wang\altaffilmark{\ref{CCPP},\ref{email}},
+  David~W.~Hogg\altaffilmark{\ref{CCPP},\ref{CDS},\ref{MPIA},\ref{FI}},
   Daniel~Foreman-Mackey\altaffilmark{\ref{UW},\ref{SF}}
   Bernhard~Sch\"olkopf\altaffilmark{\ref{MPIIS}}
   }
@@ -43,22 +43,25 @@
 \altaffiltext{\theaddress}{\stepcounter{address}\label{MPIA}%
   Max-Planck-Institut f\"ur Astronomie, Heidelberg, Germany}
 \altaffiltext{\theaddress}{\stepcounter{address}\label{email}%
-  To whom correspondence should be addressed; \texttt{<david.hogg@nyu.edu>}.}
+  To whom correspondence should be addressed; \texttt{<dun.wang@nyu.edu>}.}
 \altaffiltext{\theaddress}{\stepcounter{address}\label{UW}%
  Astronomy Department, University of Washington, Seattle, WA 98195}
 \altaffiltext{\theaddress}{\stepcounter{address}\label{SF}%
 Sagan Fellow}
 \altaffiltext{\theaddress}{\stepcounter{address}\label{MPIIS}%
   Max-Planck-Institut f\"ur Intelligente Systeme, T\"ubingen}
+\altaffiltext{\theaddress}{\stepcounter{address}\label{FI}%
+  Flatiron Institute, Simons Foundation}
+
 
 
 \begin{abstract}
 Difference imaging or image subtraction is a method that measures differential photometry by matching the pointings and point-spread functions (PSF) between image frames. 
-It has been successful in detecting variable objects and subtracting. The challenge is to accurately model the difference of PSFs between two frames. The common practice is to fit convolution kernels to account for PSF differences.
-Here we present a new category of method---\cpmdiff, in which differences are not measured between matched images but instead between image frames and a data-driven model---a model designed to only predict the systematic effects but not astronomical variability. 
-In \cpmdiff\ each pixel is modelled by the Causal Pixel Model (\cpm) originally built for modeling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough apart such that these pixels are causally disconnected, astrophysically. 
-The method is applied to  simulated data and also the \project{K2 Campaign 9} data to show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
-\cpmdiff\ produces image differences at nearly photon-noise precision. 
+It has been successful in detecting time-variable objects and phenomena.
+Here we present a new category of method---\cpmdiff, in which differences are not measured between matched images but instead between image frames and a data-driven model---designed to only predict the systematic effects but not astronomical variability. 
+In \cpmdiff\ each pixel is modelled by the Causal Pixel Model (\cpm) originally built for modeling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels on the same CCD but far enough away such that these pixels are causally disconnected, astrophysically. 
+The method is applied to  simulated data and also the \project{K2 Campaign 9} microlensing data. We show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
+\cpmdiff\ is capable of producing image differences at nearly photon-noise precision. 
 Its principal drawback is that---in its current form---it requires an imaging campaign with many epochs and fairly stable telescope pointing.
 
 \end{abstract}
@@ -66,47 +69,45 @@ Its principal drawback is that---in its current form---it requires an imaging ca
 \section{Introduction}
 
 \subsection{Difference imaging}
-Difference imaging or image subtraction is a method developed for detecting variable objects in astronomical studies, in which the difference is measured between two images that are both positionally and photometrically matched. This kind of method is optimal for analysing variabilities in astronomical images, since the method skip the procedure of doing photometry for each individual object and comparing with a catalog but directly measure the differential photometry, which is most concerned in studying astronomical variabilities.
-The common routine of difference imaging is:
+Difference imaging or image subtraction is a method developed for detecting variable objects in astronomical studies, in which the difference is measured between two images that are both positionally and photometrically matched. This kind of method is optimal for analysing variabilities in crowded astronomical images, since the method skip the procedure of doing photometry for each individual object and comparing with a catalog, but instead directly measures differential photometry.
+The common workflow for difference imaging is:
 \begin{enumerate}
 \item
-Finding a reference image, either the stack of the image frames or a frame with the best seeings.
+Creating a reference image, either stack of image frames or a frame with the best seeing.
 \item
-Registering each frames according to the reference frame.
+Registering each frame according to the reference frame.
 \item
-Matching the seeing between each frame of image and the reference frame by fitting a convolution kernel that account for the difference between PSFs of frames.
+Matching the seeing between each frame of image and the reference frame by fitting a convolution kernel that accounts for the differences between the PSFs of the frames.
 \item
-Matching the mean throughput or photometric calibration of the two frames and subtraction to find sources that have varied.
+Matching the mean throughput or photometric calibration of the two frames and subtracting to find sources that have varied.
 \end{enumerate}
-The main challenge of the difference imaging problem lays in how to optimize the convolution kernel to correctly measure the difference of PSFs between two frames.
-The first attempt of difference imaging or image subtraction was made by \cite{imagesub1}, who suggested to calculate a convolution kernel by using a bright star to match different image frames, so that the images can be differenced. 
-\cite{alard} improved the method by decomposing the kernel into three gaussians with different variances and then fitting a constant convolution kernel to match the PSFs of images.
-The current preference for difference imaging \citep{varyingkernel} is to divide images into sub-areas and fit a varying kernel to account for the spatial variation of the PSF. This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{http://www.astro.washington.edu/users/becker/v2.0/hotpants.html}}, \project{ISIS}\footnote{\url{http://www2.iap.fr/users/alard/package.html}}. 
-\cite{bramich} goes even further,  in which they make the model more flexible to handle more complicated kernel by generalizing the kernel to be a discrete pixel array instead of a linear combination of basis function.  
+The main challenge of the difference imaging problem lies in the inference of the convolution kernel that corrects the difference of PSFs between two frames.
+The first attempt at difference imaging or image subtraction was made by \cite{imagesub1}, who suggested to calculate a convolution kernel by using a bright star to match different image frames. 
+\cite{alard} improved the method by decomposing the kernel into a linear combination of basis functions and then fitting a constant convolution kernel to match the PSFs of images.
+The current preference for difference imaging \citep{varyingkernel} is to divide images into sub-areas and fit a varying kernel to account for the spatial variation of the PSF. This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{http://www.astro.washington.edu/users/becker/v2.0/hotpants.html}} and \project{ISIS}\footnote{\url{http://www2.iap.fr/users/alard/package.html}}. 
+\cite{bramich} goes even further; they handle more complicated kernels by generalizing to a discrete pixel array instead of a linear combination of basis functions.
+\todo{scientific success of difference imaging}
 
-\subsection{A new approach}
-As mentioned above, the difference imaging methods so far \citep{imagesub1, alard, varyingkernel, bramich} all follow the same framework and the only difference lays in how the convolution kernel is calculated, so hereafter in this paper we refer to this kind of methods as the classical difference imaging approach. 
+As mentioned above, the difference imaging methods so far \citep{imagesub1, alard, varyingkernel, bramich} all follow the same framework; the only difference lies in how the convolution kernel is calculated, so hereafter in this paper we refer to these methods as classical difference imaging. 
 The method proposed in this paper is completely different from the classical approach. 
-In that there is no reference image in \cpmdiff. 
-Instead of modeling each image based on the reference image, each pixel will be modeled directly by a linear combination of the other pixels of the same image. 
-In that sense, each image is its own reference image.
+There is no reference image in \cpmdiff. 
+Instead of modeling each image based on the reference image, each pixel will be modeled directly by a linear combination of other pixels from the same image. 
+In that sense, each image is its own reference image and it is the coefficients of the predictive model that are learned from the other images.
 Since the model of the image is built from itself, there is no need to measure the difference of PSFs between images and thus no convolution kernel in \cpmdiff. 
-Finally, while in classical approach only two images are compared with each other to measure the difference of PSFs, in \cpmdiff many images are used altogether to learn the coefficients, which tells how pixels are related with each other.
+Finally, while in the classical approach only two images are compared with each other to measure the difference of PSFs, in \cpmdiff\ all other images are used together to learn the coefficients, which tells how pixels are related with each other.
 
 \section{The Method}
-Due to the the differences between \cpmdiff\ and the classical approach, the method is based on the following assumptions about the data:
+\cpmdiff\ depends on the following assumptions about the data:
 \begin{enumerate}
 \item
 There are a lot of images, so that there are enough data to train (optimize) the model.
 \item
-The registration be good to about or better than one PSF width; the registration must not change by many PSF widths, which ensures that pixels from different images are illuminated by the same source.
+The registration be good to about or better than one PSF width; the registration must not change by many PSF widths, which ensures that the same pixels from different images are generally illuminated by the same sources.
 \end{enumerate}
 
-Different from the classical difference imaging method, in \cpmdiff, each pixel is modelled and the difference is measured between the model and the data. 
-The detail of the model can be found in \cite{cpm}. 
-Here we briefly outline the major routine of the method.
-
-In \cpmdiff, each pixel value $I_{m,n}$ of pixel m in time $t_n$ is predicted by a linear combination of pixel values $I_{m',n}$, where $m'$ is from a set of pixels $m'\in\set{M}_m$ that are on the same CCD but far away from the target pixel m.
+In \cpmdiff, each pixel is modelled, and the difference is measured between the model and the data. 
+The details of the model can be found in \cite{cpm}. 
+Here we briefly outline the major routine of the method. Each pixel value $I_{m,n}$ of pixel $m$ at time $t_n$ is predicted by a linear combination of pixel values $I_{m',n}$, where $m'$ is from a set of pixels $m'\in\set{M}_m$ that are on the same CCD but far away from the target pixel m.
 \begin{eqnarray}
 I_{m,n}         &=& I^{\ast}_{m,n} + e_{m,n}
 \\
@@ -128,10 +129,10 @@ D_{m,n} &=& I_{m,n} - I^{\ast}_{m,n}
 \end{eqnarray}
 
 \section{Experiements}
-In order to illustrate how \cpmdiff\ performs, here we present several experiments both on mock and real data. 
+In order to illustrate how \cpmdiff\ performs, here we present several experiments on mock and real data. 
 First, \cpmdiff\ is tested under different observation conditions (space-based and ground-based) with mock data. 
-Then,  the method is appalled to the \KTCN\ data to show how it performs with the real data. 
-In the end of this section,  large variations of pointing and PSF are tested with mock data to study the limitation of \cpmdiff.
+Then,  the method is appalled to the \KTCN\ data to show how it performs with real data. 
+In the end of this section,  large variations of pointing and PSF are tested with mock data to study the limitations of the method.
 
 \subsection{Mock data}
 To produce the mock data, TRILEGAL \footnote{\url{http://stev.oapd.inaf.it/cgi-bin/trilegal}} is used to generate a catalog of the stars with magnitudes. 
@@ -160,18 +161,18 @@ For pixel centered on (r, s), the value of the pixel is evaluated by the equatio
 p_{r,s} &=& \sum_{i}^{N} PRF(r-x_i, s-y_i) f_i\\
 \end{eqnarray}
 where $(x_i,y_i)$ is the coordinate of the star i on the image and $f_i$ is the flux associated with that star. 
-$PRF(\Delta x, \Delta y)$ is the pixel response function (or pixel convolved point spread function). 
-Here a 2-d gaussian $PRF(\Delta x, \Delta y) = A \exp(a\Delta x^2-b\Delta x \Delta y+c\Delta y^2)$ is used and parameter a,b,c is tuned to change the shape and width of the PRF.
+$PRF(\Delta x, \Delta y)$ is the pixel response function (or pixel-convolved point spread function). 
+Here a 2-d gaussian $PRF(\Delta x, \Delta y) = A \exp(a\Delta x^2-b\Delta x \Delta y+c\Delta y^2)$ is used and parameters a,b,c are adjusted to change the shape and width of the PRF.
 
-After all the series of the images are generated, a flat-field uncertainty is drawn from a normal distribution with $\mu=1, \sigma=0.01$ to account for the inter-pixel variation of the detector and photon noise is also added to each individual pixel.
+After the series of images is generated, a flat-field error is drawn from a normal distribution with $\mu=1, \sigma=0.01$ to account for the inter-pixel variation of the detector and photon noise is also added to each individual pixel.
 
-\subsection{Space-based}
-In space-based observation, the systematics are mainly caused by the pointing motion and rotation of the CCD, while the PSF is relatively stable. 
+\subsection{Space-based mock data}
+In space-based observations like those made in the \kepler\ mission, the systematics are mainly caused by changes of the pointing and rotation of the camera, while the PSF is relatively stable. 
 Thus the space-based mock data only includes the pointing motion and rotation, but maintains the PSF unchanged.
-In this experiment, the pointing motion is restricted within one pixel and the rotation is restricted within 0.5 deg with respective to the center of the image.  
-To illustrate how variable sources will be detected in \cpmdiff, an periodic variable star (modelled by a sine function) is injected in the image.
+In this experiment, the pointing changes have an amplitude of one pixel and the rotation is restricted within 0.5 deg with respective to the center of the image.  
+To illustrate how variable sources will be detected in \cpmdiff, one single periodic variable star (modelled by a sine function) is injected in the image.
 Fig~\ref{space} shows three snapshots of the mock data and the \cpmdiff\ of different times. 
-The \cpm\ modelled the data perfectly that each pixel was modelled with precision close to the photon noise, except  the injected variable was still preserved in the difference image.
+The \cpm\ modelled the data  with precision close to the photon noise, except  the injected variable was still preserved in the difference image.
 
 
 \begin{figure}[p]
@@ -188,18 +189,18 @@ The \cpm\ modelled the data perfectly that each pixel was modelled with precisio
   \emph{Left:} mock data image;
   \emph{Middle:} the prediction of the \cpmdiff;
   \emph{Right:} the relative difference between the data and the prediction, the color bar shows the relative difference;
-  Most of the pixel values are around zero, except for the varible source (upper-left corner), which means the \cpmdiff\ can perfectly predict the image data, while pull out the varibles.
+  Most of the pixel values are around zero, except for the varible source (upper-left corner), which means the \cpmdiff\ can predict the image data, while detects the varibles.
 }
 \end{figure}
 
-\subsection{Ground-based}
-In ground-based observation, apart from pointing motion, weather changes and atmosphere distortion will also affect PSF dramatically. 
+\subsection{Ground-based mock data}
+In ground-based observations, apart from pointing motion, weather changes and atmospheric distortions will also affect the PSF dramatically. 
 Therefore the PSF variation was also included in the mock data. 
 The pointing motion and rotation of the mock data are same as in the space-based test.
-Variation of the PSF is achieved by varying the parameters in a 2-d gaussian PRF function: $PRF(\Delta x, \Delta y) = A exp(a\Delta x^2-b\Delta x \Delta y+c\Delta y^2)$.
+Variation of the PSF is achieved by varying the parameters a, b, c.
 The full width half maximum in both direction are restricted between 2 to 4 pixels.
 Fig~\ref{ground} shows the same mock data as in space-based test, but with PRF variation included.  
-Again as the space-based test,  the \cpmdiff\ was able to model both pointing motion and PRF variation, while still pulled out the variable star in the differencing image.
+As in the space-based test,  the \cpmdiff\ was able to model both pointing motion and PRF variation, while still pulled out the variable star in the differencing image.
 This experiment further confirms that \cpmdiff\ can calibrate both space-based and ground-based data.
 
 \begin{figure}[p]
@@ -221,13 +222,13 @@ This experiment further confirms that \cpmdiff\ can calibrate both space-based a
 
 \subsection{\KTCN}
 Now we test our method on a $64\times50$ pixel patch (\epic\ 200069960) from \KTCN\footnote{\url{https://keplerscience.arc.nasa.gov/k2-c9.html}}, which was dedicated to a study of gravitational microlensing events.
-This data set is an ideal test bed for difference imaging, since it observed a super crowded field near the bulge, where high precision photometry is hard to be achieved directly.
+This data set is an ideal test bed for difference imaging, since it observed a very crowded field near the bulge, where high precision photometry is difficult to achieve directly.
 
 Fig~\ref{k2c9} shows three snapshots of the data and the \cpmdiff\ of different times.
 Constant sources in the dense field were almost all cancelled with the \cpm\ prediction, while variables (located at the red box) were preserved and can even be picked by eye from the difference image.
 Variable sources were detected with the variation map (mean of absolute normalized deviations of the difference image). 
 Light curves of six variable sources with highest signal to noise ratio is presented in Fig~\ref{lightcurve} as examples. 
-Each light curve was constructed with simple aperture photometry, by co-adding all the difference flux within a $3 \times 3$ aperture.
+Each light curve was constructed with simple aperture photometry, by co-adding all the difference flux within a $3 \times 3$ aperture. Note that this is not optimal photometry; it is simply illustration of what is possible.
 
 \begin{figure}[p]
 \begin{center}
@@ -265,10 +266,10 @@ Each light curve was constructed with simple aperture photometry, by co-adding a
 
 \subsection{Limitation of \cpmdiff}
 In previous sections,  \cpmdiff\ was proved on both mock and real data that the method is able to model both pointing motion and PSF variations, with which variable sources detection and photometry can be achieved.
-In this section, we want to push these variations to the limitation of \cpmdiff\ to define the scope of application of the method. Three experiments are conducted with large variations in pointing, roll and PSF.
+In this section, we want to push these variations to the limitation of \cpmdiff\ to define the scope of applicability of the method. Three experiments are conducted with large variations in pointing, roll and PSF.
 
 First, overall translation up to 10 pixels was applied to the mock data to simulate the huge pointing motion.   
-Fig~\ref{large_rotation} shows that with large pointing motion, there is sudden jump in pixel value between image frames. 
+Fig~\ref{large_motion} shows that with large pointing motion, there is sudden jump in pixel value between image frames. 
 The quality of the difference image degrades dramatically around relatively bright sources, because of the additional variabilities introduced by the motion of bright sources.
 In addition,  the variable source flux also distributes in a large range of pixels due to the pointing motion, which increase the difficulties of photometric measurement.
 With the same data set, in Fig~\ref{large_rotation}, the image was rotated with respect to the center up to 20 deg. 
