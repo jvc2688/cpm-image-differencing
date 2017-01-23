@@ -10,5 +10,6 @@ TSWLatexianTemp*
 *.ps
 *eps-converted-to.pdf
 ~*
+figures_old/*
 
 cdi.pdf
