@@ -54,8 +54,6 @@ Sagan Fellow}
   Max-Planck-Institut f\"ur Intelligente Systeme, T\"ubingen}
 
 
-
-
 \begin{abstract}
 Difference imaging or image subtraction is a method that measures differential photometry by matching the pointings and point-spread functions between image frames. 
 It has been extremely reliable for detecting time-variable phenomena.
@@ -67,7 +65,7 @@ We show that \cpmdiff\ is able to detect variable objects and produce good photo
 Its principal drawback is that---in its current form---it requires an imaging campaign with many epochs and fairly stable telescope pointing.
 \end{abstract}
 
-\keyword{
+\keywords{
 instrumentation: detectors
 ---
 methods: data analysis
@@ -107,6 +105,8 @@ These kinds of methods will play an even more important role in time-domain astr
 There will be the \project{LSST} \citep{lsst}, which will image the entire night sky to great depth repeatedly to find distant transient events of known kinds and even discover new class of variable objects. 
 There will be the \project{TESS} \citep{tess}, which will produce a continuous series of full frame images covering 2300 $deg^2$ of the sky with 30-minute cadence, in which bunch of variable sources such as near-Earth asteroids,  bright AGN outbursts and nearby supernovae will be detected.
 There will also be \project{Euclid} \citep{Euclid} and \project{WFIRST} \citep{wfirst}, which are likely to have time-domain survey fields.
+
+\todo{model the whole sky:DWH}
 
 As mentioned above, the difference imaging methods so far \citep{imagesub1, alard, varyingkernel, bramich} all follow the same framework; the only difference lies in how the convolution kernel is calculated, so hereafter in this paper we refer to these methods as classical difference imaging. 
 The method proposed in this paper is completely different from the classical approach. 
@@ -386,13 +386,13 @@ However, from the experiment, moderate PRF variations are still acceptable.
   \emph{Left:} mock data image;
   \emph{Middle:} the prediction of the \cpmdiff;
   \emph{Right:} the relative difference between the data and the prediction, the color bar shows the relative difference; the histogram shows the distribution of the difference and the dashed curve is the photon noise: Gaussian with $\sigma = 10^{-4}$. 
-  With the amplitude of rotation increasing, the quality of the difference image drops dramtically in the corner, while almostly remains unchanged in the middle.
+  With the amplitude of rotation increasing, the quality of the difference image drops dramatically in the corner, while almostly remains unchanged in the middle.
 }
 \end{figure}
 
 \begin{figure}[p]
 \begin{center}
-\includegraphics[width=0.95\textwidth]{move_new}
+\includegraphics[width=0.95\textwidth]{move_new_p}
 \end{center}
 \caption{
 \label{motion_rms}
@@ -425,7 +425,7 @@ However, from the experiment, moderate PRF variations are still acceptable.
 
 \begin{figure}[p]
 \begin{center}
-\includegraphics[width=0.95\textwidth]{prf}
+\includegraphics[width=0.95\textwidth]{prf_p}
 \end{center}
 \caption{
 \label{prf_rms}
