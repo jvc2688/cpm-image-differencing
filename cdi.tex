@@ -95,11 +95,13 @@ Match the seeing between each frame of image and the reference frame by fitting 
 Match the mean throughput or photometric calibration of the two frames and subtract to find sources that have varied.
 \end{enumerate}
 The main challenge of the difference imaging problem lies in the inference of the convolution kernel that corrects the difference of PSFs between two frames.
-The first attempt at difference imaging or image subtraction was made by \cite{imagesub1}, who suggested to calculate a convolution kernel by using a bright star to match different image frames. 
+The first attempt at difference imaging or image subtraction was made by \cite{imagesub1}, who suggested to calculate a convolution kernel by taking the ratio of two images of a bright star in Fourier space. 
 \cite{alard} improved the method by decomposing the kernel into a linear combination of basis functions and then fitting a constant convolution kernel to match the PSFs of images.
 The current preference for difference imaging \citep{varyingkernel} is to divide images into sub-areas and fit a varying kernel to account for the spatial variation of the PSF. 
 This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{http://www.astro.washington.edu/users/becker/v2.0/hotpants.html}} and \project{ISIS}\footnote{\url{http://www2.iap.fr/users/alard/package.html}}, \cite{varyingkernel}. 
 \cite{bramich} goes even further; they handle more complicated kernels by generalizing to a discrete pixel array instead of a linear combination of basis functions.
+\cite{optimal} based on the likelihood ratio test and derived a closed form of subtraction image.
+Instead of solving the convolution kernel, PSFs estimation of both reference and new images are required.
 Difference imaging achieved great success in detecting variable sources such as microlensing events search \citep{macho, ogle} and supernova survey \citep{sdss}.
 These kinds of methods will play an even more important role in time-domain astronomy in the near future. 
 There will be the \project{LSST} \citep{lsst}, which will image the entire night sky to great depth repeatedly to find distant transient events of known kinds and even discover new class of variable objects. 
@@ -109,6 +111,8 @@ There will also be \project{Euclid} \citep{Euclid} and \project{WFIRST} \citep{w
 \todo{model the whole sky:DWH}
 
 As mentioned above, the difference imaging methods so far \citep{imagesub1, alard, varyingkernel, bramich} all follow the same framework; the only difference lies in how the convolution kernel is calculated, so hereafter in this paper we refer to these methods as classical difference imaging. 
+\cite{optimal} is slightly different in terms that it does not solve convolution kernels.
+However it still follows the procedure of matching two images through convolution, so we categorize this method into the classical approach.
 The method proposed in this paper is completely different from the classical approach. 
 There is no reference image in \cpmdiff. 
 Instead of modelling each image based on the reference image, each pixel will be modelled directly by a linear combination of other pixels from the same image. 
@@ -118,16 +122,17 @@ Finally, while in the classical approach only two images are compared with each 
 In what follows, we elucidate this method and look at its capabilities and limitations.
 
 \section{The Method} \label{method}
-\cpmdiff\ depends on the following assumptions about the data:
+\cpmdiff\ depends on the following requirements about the data:
 \begin{enumerate}
 \item
 There are a lot of images, so that there are enough data to train (optimize) the model.
 \item
-The registration be good to about or better than one PSF width; the registration must not change by many PSF widths, which ensures that the same pixels from different images are generally illuminated by the same sources.
+The registration be good to about or better than one PSF width; the registration must not change by many PSF widths, which ensures that the corresponding pixels from different images are generally illuminated by the same sources. 
+In detail the assumption is that the variations in the measured scene due to shifts, rotations, and PSF variations are small enough to be treated in with reasonable accuracy in a quasi-linear regime.
 \end{enumerate}
 
-In \cpmdiff, each pixel is modelled, and the difference is measured between the model and the data. 
-The details of the model can be found in \cite{cpm}. 
+In \cpmdiff, each pixel is modeled, and the difference is measured between the model and the data. 
+The details of the model are almost identical to the \cpm\ model \citep{cpm} and more detail about what assumptions are being made are also spelled out there. 
 Here we briefly outline the major routine of the method. Each pixel value $I_{m,n}$ of pixel $m$ at time $t_n$ is predicted by a linear combination of pixel values $I_{m',n}$, where $m'$ is from a set of pixels $m'\in\set{M}_m$ that are on the same CCD but far away from the target pixel m.
 \begin{eqnarray}
 I_{m,n}         &=& I^{\ast}_{m,n} + e_{m,n}
@@ -135,17 +140,17 @@ I_{m,n}         &=& I^{\ast}_{m,n} + e_{m,n}
 I^{\ast}_{m,n}  &=& \sum_{m'\in\set{M}_m} a_{m,m'}I_{m',n} 
 \quad,
 \end{eqnarray}
-where $I^{\ast}_{m,n}$ is the prediction (by the model) for data point $I_{m,n}$, $e_{m,n}$ is residual away from the prediction, and $a_{m,m'}$ is the parameters (linear coefficients of the prediction).
-The parameters $a_{m,m'}$ are estimated by standard $\chi^2$ minimization with an additional regularization term that penalizes large absolute values for the the coefficients $a_{m,m'}$ to avoid overfitting:
+where $I^{\ast}_{m,n}$ is the prediction (by the model) for data point $I_{m,n}$, $e_{m,n}$ is the residual away from the prediction, and the $a_{m,m'}$ are parameters (linear coefficients of the prediction).
+The parameters $a_{m,m'}$ are estimated by standard $\chi^2$ minimization with an additional regularization term that penalizes large absolute values for the the coefficients $a_{m,m'}$:
 \begin{eqnarray}
 \chi^2_{m}    &=& \sum_{n} \frac{[I_{m,n} - I^{\ast}_{m,n}]^2}{\sigma^2_{m,n}}+ \lambda_{a}\sum_{m'\in\set{M}_m}a_{m,m'}^2 
 \quad,
 \end{eqnarray}
 where the $\sigma^2_{m,n'}$ are the individual-pixel noise variances, and $\lambda_{a}$ set the strength of the regularization for parameters $a_{m,m'}$.
-This objective assumes effectively that the noise is close to gaussian.
+This objective assumes effectively that the noise is close to gaussian with known variances $\sigma^2_{m,n'}$.
 
 In \cpm, the number of predictor pixels in $\set{M}_m$ and the regularization strength $\lambda_{a}$ are two hyper-parameters that need to be set by cross-validation to optimize the performance. 
-In addition, the method to rank the predictor pixels should also be explored and optimized.
+In addition, the method we employ to choose the predictor pixels should also be explored and optimized.
 Since finding the optimal $\set{M}_m$ is complicated and time-consuming, in this paper we excluded 10 closest rows and columns from the target pixel and chose the 400 closest pixels that are at least 16 pixels away from the target pixel in the rest pixels.
 With the $\set{M}_m$ settled,  the $\lambda_{a}$ was chosen by running a coarse-grid cross-validation. 
 Here the setting of the hyper-parameters is not optimal and only for demonstration. 
@@ -157,14 +162,14 @@ D_{m,n} &=& I_{m,n} - I^{\ast}_{m,n}
 \quad.
 \end{eqnarray}
 
-\section{Experiements}
+\section{Experiments}
 In order to illustrate how \cpmdiff\ performs, here we present several experiments on mock and real data. 
 First, \cpmdiff\ is tested under different observation conditions (space-based and ground-based) with mock data. 
 Then,  the method is appalled to the \KTCN\ data to show how it performs with real data. 
 In the end of this section,  large variations of pointing and PSF are tested with mock data to study the limitations of the method.
 
 \subsection{Mock data}
-To produce the mock data, \project{TRILEGAL\footnote{\url{http://stev.oapd.inaf.it/cgi-bin/trilegal}}}, \cite{TRILEGAL}  is used to generate a catalog of the stars with magnitudes. 
+To produce the mock data, \project{TRILEGAL\footnote{\url{http://stev.oapd.inaf.it/cgi-bin/trilegal}}} \citep{TRILEGAL}  is used to generate a catalog of stars with magnitudes. 
 The initial coordinates of the stars are randomly drawn from a 2-d uniform distribution. 
 For each frame of the image, the same affine transformation is applied  to all the stars to imitate the pointing motion and rotation of the camera:
 \begin{eqnarray}\label{transformation}
@@ -195,11 +200,16 @@ where $(x_i,y_i)$ is the coordinate of the star i on the image and $f_i$ is the 
 $PRF(\Delta x, \Delta y)$ is the pixel response function (or pixel-convolved point spread function). 
 Here a 2-d gaussian is used:
 \begin{eqnarray} \label{prf}
-PRF(\Delta x, \Delta y) &=& A \exp(a\Delta x^2-b\Delta x \Delta y+c\Delta y^2) 
+PRF(\vec{r}) &=& A \exp(-\frac{1}{2} \vec{r}\cdot V^{-1}\cdot \vec{r}) \\
+V^{-1} &=& 
+\begin{bmatrix}
+    \frac {\cos ^{2}\phi }{f_{x}^{2}}+\frac {\sin ^{2}\phi }{f_{y}^{2}} & -\frac {\sin 2\phi }{2f_{x}^{2}}+\frac {\sin 2\phi }{2f_{y}^{2}}  \\
+    -\frac {\sin 2\phi }{2f_{x}^{2}}+\frac {\sin 2\phi }{2f_{y}^{2}} & \frac {\sin ^{2}\phi }{f_{x}^{2}}+\frac {\cos ^{2}\phi }{f_{y}^{2}} \\
+\end{bmatrix}
 \end{eqnarray}
-where $a={\frac {\cos ^{2}\theta }{f_{x}^{2}}}+{\frac {\sin ^{2}\theta }{f_{y}^{2}}}, b=-{\frac {\sin 2\theta }{f_{x}^{2}}}+{\frac {\sin 2\theta }{f_{y}^{2}}}, c={\frac {\sin ^{2}\theta }{f_{x}^{2}}}+{\frac {\cos ^{2}\theta }{f_{y}^{2}}}$.
-$f_x$ and $f_y$ are the full width half maximum of the gaussian in x and y direction, and $\theta$ determines the orientation of the gaussian.
-Parameters $f_x$, $f_y$, $\theta$ are adjusted to change the shape and width of the PRF.
+where $\vec{r}$ is the column vector and V is a tensor describing the variance of the PRF.
+$f_x$ and $f_y$ are the full width half maximum of the gaussian in x and y direction, and $\phi$ determines the orientation of the gaussian.
+Parameters $f_x$, $f_y$, $\phi$ are adjusted to change the shape and width of the PRF.
 
 After the series of images is generated, a flat-field error $\epsilon_{r,s}$ is drawn from a normal distribution with $\mu=1, \sigma=0.01$ to account for the inter-pixel variation of the detector.
 With the flat-field error included, the value of the each pixel is $p'_{r,s} = p_{r,s}\epsilon_{r,s}$.
@@ -207,9 +217,8 @@ Finally photon noise approximated by a Gaussian with $\sigma = 10^{-4}$ is also 
 
 \subsection{Mock space-based data}
 In space-based observations like those made in the \kepler\ mission, the systematics are mainly caused by changes of the pointing and rotation of the camera, while the PSF is relatively stable. 
-Thus the mock space-based data only includes the pointing motion and rotation, but maintains the PSF unchanged.
-In this experiment, the pointing changes in both x and y direction have an amplitude of one pixel and the rotation is restricted within 0.5 deg with respective to the center of the image. 
-Both $t_x $ and $t_y$ in equation \ref{transformation} are drawn from uniform distribution ${\mathcal {U}}(0,1)$ and $\theta$ is drawn from ${\mathcal {U}}(0,0.5)$. 
+Thus the mock space-based data only includes the pointing motion and rotation, but maintains the PSF unchanged from image to image.
+In this experiment,  both $t_x $ and $t_y$ in equation \ref{transformation} are drawn from uniform distribution ${\mathcal {U}}(0,1)$ pixels and $\theta$ is drawn from ${\mathcal {U}}(0,0.5)$ deg. 
 To illustrate how variable sources will be detected in \cpmdiff, one single periodic variable star (modelled by a sine function) is injected in the image.
 Fig.~\ref{space} shows three snapshots of the mock data and the \cpmdiff\ of different times. 
 The \cpm\ modelled the data with precision close to the photon noise, except the injected variable was still preserved in the difference image. 
@@ -234,7 +243,7 @@ Therefore the photometry is not optimal and is only intended for demonstration.
   \emph{Right:} the relative difference between the data and the prediction, the color bar shows the relative difference;
   the histogram shows the distribution of the difference and the dashed curve is the photon noise: Gaussian with $\sigma = 10^{-4}$.
   Note the small but significant astrometric shifts between images.
-  Most of the pixel values are around zero, except for the variable source (upper-left corner), which shows that \cpmdiff\ can predict the image data, while detecting the variables. 
+  Most of the difference-image pixel values are near zero, except for the variable source (upper-left corner), which shows that \cpmdiff\ can predict the image data, while detecting the variables. 
 }
 \end{figure}
 
@@ -250,13 +259,13 @@ Therefore the photometry is not optimal and is only intended for demonstration.
 \end{figure}
 
 \subsection{Mock ground-based data}
-In ground-based observations, apart from changes in pointing and rotation, weather changes and atmospheric distortions will also affect the PSF dramatically. 
-Therefore the PSF variation was also included in the mock data. 
+In ground-based observations, in addition to changes in pointing and rotation, weather changes and atmospheric distortions will also affect the PSF. 
+Therefore PSF variation was also included in the mock ground-based data. 
 The pointing motion and rotation of the mock data are same as in the space-based test.
-Variation of the PSF is achieved by varying the parameters $f_x, f_y, \theta$ defined in equation \ref{prf}.
-Both $f_x$ and $f_y$ are drawn from uniform distribution ${\mathcal {U}}(2,3)$ to restrict the full width half maximum of the PRF in both direction within 2-3 pixels and $\theta$ is drawn from ${\mathcal {U}}(0,\pi)$, which allows the orientation of the PRF to be in any direction.
+Variation of the PSF is achieved by varying the parameters $f_x, f_y, \phi$ defined in equation \ref{prf}.
+Both $f_x$ and $f_y$ are drawn from uniform distribution ${\mathcal {U}}(2,3)$ pixels to restrict the full width half maximum of the PRF in both direction within 2-3 pixels and $\phi$ is drawn from ${\mathcal {U}}(0,\pi)$, which allows the orientation of the PRF to be in any direction.
 Fig.~\ref{ground} and Fig.~\ref{ground_lc} show the same mock data and light curves as in space-based test, but with PRF variation included.  
-As in the space-based test, the \cpmdiff\ was able to model both pointing motion and PRF variations, while still detect the variable star in the differencing image.
+As in the space-based test, the \cpmdiff\ was able to model both pointing motion and PRF variations, while still detecting the variable star in the differencing image.
 Note that the PRF variations do degrade the quality of the difference image a little, since the changes of the PRF will change the correlation between pixels.
 This experiment further confirms that \cpmdiff\ can calibrate both space-based and ground-based data.
 
@@ -293,9 +302,10 @@ This experiment further confirms that \cpmdiff\ can calibrate both space-based a
 \subsection{\KTCN\ real data}
 Now we test our method on a $64\times50$ pixel patch (\epic\ 200069960) from \KTCN\footnote{\url{https://keplerscience.arc.nasa.gov/k2-c9.html}}\citep{k2c9}, which was dedicated to a study of gravitational microlensing events.
 This data set is an ideal test bed for difference imaging, since it observed a very crowded field near the bulge, where high precision photometry is difficult to achieve directly.
+\cite{wei} has already applied \class\ on this data set and is able to model some microlensing events.
 
 Fig.~\ref{k2c9} shows three snapshots of the data and the \cpmdiff\ of different times.
-Constant sources in the dense field were almost all cancelled with the \cpm\ prediction, while variables (located at the red box) were preserved and can even be picked by eye from the difference image.
+Constant sources in the dense field were almost all cancelled with the \cpm\ prediction, while variables (located at the white crosshairs) were preserved and can even be picked by eye from the difference image.
 Variable sources were detected with the variation map (mean of absolute normalized deviations of the difference image). 
 Light curves of six variable sources with highest signal to noise ratio is presented in Fig.~\ref{lightcurve} as examples. 
 Each light curve was constructed with simple aperture photometry, by co-adding all the difference flux within a $3 \times 3$ aperture. 
@@ -336,15 +346,15 @@ Note that this is not optimal photometry; it is simply illustration of what is p
 \end{figure}
 
 
-\subsection{Limitation of \cpmdiff}
+\subsection{Limitation of \cpmdiff}\label{limits}
 In previous sections,  \cpmdiff\ was proved on both mock and real data that the method is able to model pointing motion, rotation and PSF variations, with which variable sources detection and photometry can be achieved.
 In this section, we want to push these variations to the limitation of \cpmdiff\ to define the scope of applicability of the method. Three experiments are conducted with large variations in pointing, roll and PSF.
 
 First, mock data with the same rotation and PRF variations, but different amplitudes of pointing motion were tested by the model.
-Here both $t_x$ and $t_y$ defined in equation \ref{transformation} were drawn from uniform distribution ${\mathcal {U}}(0,t_A)$, in which the upper limit $t_A$ defines the amplitude of the pointing motion.
+Here both $t_x$ and $t_y$ defined in equation \ref{transformation} were drawn from uniform distribution ${\mathcal {U}}(0,t_A)$ pixels, in which the upper limit $t_A$ defines the amplitude of the pointing motion.
 Fig.~\ref{large_motion} shows that with the amplitude of the pointing motion increasing,  the quality of the difference image degrades dramatically, especially around relatively bright sources, because of the additional variabilities introduced by the motion of bright stars.
 Similarly, in Fig.~\ref{large_rotation}, mock data with the same pointing and PRF variations, but different amplitudes of rotation were tested by the model.
-In each data set, $\theta$ defined in equation \ref{transformation} was drawn from uniform distribution ${\mathcal {U}}(0,\theta_A)$, in which the upper limit $\theta_A$ defines the amplitude of the rotation.
+In each data set, $\theta$ defined in equation \ref{transformation} was drawn from uniform distribution ${\mathcal {U}}(0,\theta_A)$ deg, in which the upper limit $\theta_A$ defines the amplitude of the rotation.
 The corner of the difference image is much worse modelled, since the images are worse aligned in the corner due to the rotation. 
 In order to quantitatively study the limitation of the pointing and rotation variation, the quality of each difference image is evaluated by the root-median-square residual (RMS residual) and the overall performance of the model is determined by the median of the RMS Residuals of all the difference images.
 The amplitude of the pointing and rotation variations are both translated to the overall motions of stars in unit of FWHM of PRF.
@@ -352,7 +362,7 @@ Fig.~\ref{motion_rms} shows the median RMS residual as a function of the RMS mot
 These four lines in the plot show almost consistent relation that image quality degrades with moving stars by FWHMs.
 This test also confirms the assumption that the registration should be good to about or better than one PSF width.
 Finally, mock data with different amplitudes of PRF variation were tested.
-Parameters $f_x$ and $f_y$ defined in equation \ref{prf} were drawn from uniform distribution ${\mathcal {U}}(2,f_{max})$, in which the width of the uniform distribution $f_{max}-2$ defines the amplitude of the PRF variation.
+Parameters $f_x$ and $f_y$ defined in equation \ref{prf} were drawn from uniform distribution ${\mathcal {U}}(2,f_{max})$ pixels, in which the width of the uniform distribution $f_{max}-2$ defines the amplitude of the PRF variation.
 Fig.~\ref{large_prf} and Fig.~\ref{prf_rms} indicate that large PRF variations do degrade the performance of the model, since dramatic changes of the PRF can also largely change the correlation between pixels.
 However, from the experiment, moderate PRF variations are still acceptable. 
 
@@ -434,6 +444,23 @@ However, from the experiment, moderate PRF variations are still acceptable.
 \end{figure}
 
 \section{Discussion}It has been demonstrated that the \cpmdiff\ is able to predict the image with precision close to the photon noise, while preserve the variable sources with both space-based and ground-based data with moderate pointing, rotation and PSF variations. 
+Here we list few reasons \cpmdiff\ may be preferred over other methods:
+
+\begin{enumerate}
+\item All \class\ approachs require precise image registration as a priori step. 
+Any astrometric alignment error between image frames will lead to imperfection of subtraction.
+In comparison, the precision requirement of registration is largely relaxed in \cpmdiff. 
+As demonstrated in Section \ref{limits}, with pointing variation smaller than $\sim$1 FWHM of PSF, precision close to photon noise can still be achieved by our method.  
+
+\item All \class\ approcahs require direct or indirect information of the PSF. 
+\cite{imagesub1}, \cite{alard} and \cite{bramich} model the difference of PSFs between images by solving the convolution kernel.
+In \cite{optimal}, both PSFs of reference and new images need to be known explicitly.
+Any imperfection of the PSF(or difference of PSFs) estimation will lead to subtraction residuals.
+\cpmdiff\ avoids PSF estimation, since there is no convolution kernel in subtraction.
+
+\item For photometry, de-trending process may also be required after image subtraction in the classical approach to account for extra variabilities induced by intra-and inter-pixel variations.
+In comparison, \cpmdiff\ mitigates these effects internally.
+\end{enumerate}
 
 Although \cpmdiff\ performances impressively in the paper,  in order to fully exploit the potential of the method, it is still essential to find an optimal set of hyper-parameters and optimize the selection of predictors as mentioned in Section \ref{method}. 
 In the original \cpm, there are two hyper-parameters---the number of predictor pixels N and the strength of the L2-regularization $\lambda_a$, which can be optimized by cross-validation. 
