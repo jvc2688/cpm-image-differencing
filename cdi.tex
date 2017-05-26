@@ -55,12 +55,13 @@ Sagan Fellow}
 
 
 \begin{abstract}
-Difference imaging or image subtraction is a method that measures differential photometry by matching the pointings and point-spread functions between image frames. 
+Difference imaging or image subtraction is a method that measures differential photometry by matching the pointing and point-spread function (PSF) between image frames. 
 It has been extremely reliable for detecting time-variable phenomena.
-Here we present a new category of method---\cpmdiff, in which differences are not measured between matched images but instead between image frames and a data-driven predictive model---designed only to predict the systematic effects but not astronomical variability. 
+Here we present a new category of method---\cpmdiff, in which differences are not measured between matched images but instead between image frames and a data-driven predictive model---designed only to predict the pointing, PSF, and detector effects but not astronomical variability. 
 In \cpmdiff\ each pixel is modelled by the Causal Pixel Model (\cpm) originally built for modeling \kepler\ data, in which pixel values are predicted by a linear combination of other pixels at the sam epoch but far enough away such that these pixels are causally disconnected, astrophysically. 
+It does not require that the user have any explicit model or description of the pointing or point-spread function of any of the images.
 The method is applied to simulated data and also the \project{K2 Campaign 9} microlensing data. 
-We show that \cpmdiff\ is able to detect variable objects and produce good photometry in the crowded field.
+We show that \cpmdiff\ is able to detect variable objects and produce good photometry in a crowded field.
 \cpmdiff\ is capable of producing image differences at nearly photon-noise precision. 
 Its principal drawback is that---in its current form---it requires an imaging campaign with many epochs and fairly stable telescope pointing.
 \end{abstract}
@@ -76,7 +77,7 @@ techniques: image processing
 ---
 telescopes
 ---
-ultraviolet: stars
+stars: variables: general
 }
 
 \section{Introduction}
@@ -102,6 +103,7 @@ This method is implemented and widely used as \project{HOTPANTS}\footnote{\url{h
 \cite{bramich} goes even further; they handle more complicated kernels by generalizing to a discrete pixel array instead of a linear combination of basis functions.
 \cite{optimal} based on the likelihood ratio test and derived a closed form of subtraction image.
 Instead of solving the convolution kernel, PSFs estimation of both reference and new images are required.
+
 Difference imaging achieved great success in detecting variable sources such as microlensing events search \citep{macho, ogle} and supernova survey \citep{sdss}.
 These kinds of methods will play an even more important role in time-domain astronomy in the near future. 
 There will be the \project{LSST} \citep{lsst}, which will image the entire night sky to great depth repeatedly to find distant transient events of known kinds and even discover new class of variable objects. 
