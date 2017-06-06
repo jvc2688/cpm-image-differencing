@@ -327,9 +327,9 @@ This data set is an ideal test bed for difference imaging, since it observed a v
 Fig.~\ref{k2c9} shows three snapshots of the data and the \cpmdiff\ of different times.
 Constant sources in the dense field were almost all cancelled with the \cpm\ prediction, while variables (located at the white crosshairs) were preserved and can even be picked by eye from the difference image.
 Variable sources were detected with the variation map (mean of absolute normalized deviations of the difference image). 
-Light curves of six variable sources with highest signal to noise ratio is presented in Fig.~\ref{lightcurve} as examples. 
+Light curves of six variable sources with high signal-to-noise ratio are presented in Fig.~\ref{lightcurve} as examples. 
 Each light curve was constructed with simple aperture photometry, by co-adding all the difference flux within a $3 \times 3$ aperture. 
-Note that this is not optimal photometry; it is simply illustration of what is possible with this method.
+Note that this is not optimal photometry; it is simply an illustration of what is possible with this method.
 
 \begin{figure}[p]
 \begin{center}
@@ -367,10 +367,12 @@ Note that this is not optimal photometry; it is simply illustration of what is p
 
 
 \subsection{Limitation of \cpmdiff}\label{limits}
-In previous sections,  \cpmdiff\ was proved on both mock and real data that the method is able to model pointing motion, rotation and PSF variations, with which variable sources detection and photometry can be achieved.
-In this section, we want to push these variations to the limitation of \cpmdiff\ to define the scope of applicability of the method. Three experiments are conducted with large variations in pointing, roll and PSF.
+In the above,  \cpmdiff\ was demonstrated on mock and real data. 
+It is able to model pointing motion, rotation and PSF variations, such that variable-source detection and photometry can be achieved.
+In this Section, we want to push these variations to the limits of what \cpmdiff\ can handle to define the scope of applicability of the method. 
+Three experiments are conducted with large variations in pointing, roll and PSF.
 
-First, mock data with the same rotation and PRF variations, but different amplitudes of pointing motion were tested by the model.
+First, mock data with the same rotation and PRF variations, but different amplitudes of pointing motion, were tested.
 Here both $t_x$ and $t_y$ defined in equation \ref{transformation} were drawn from uniform distribution ${\mathcal {U}}(0,t_A)$ pixels, in which the upper limit $t_A$ defines the amplitude of the pointing motion.
 Fig.~\ref{large_motion} shows that with the amplitude of the pointing motion increasing,  the quality of the difference image degrades dramatically, especially around relatively bright sources, because of the additional variabilities introduced by the motion of bright stars.
 Similarly, in Fig.~\ref{large_rotation}, mock data with the same pointing and PRF variations, but different amplitudes of rotation were tested by the model.
