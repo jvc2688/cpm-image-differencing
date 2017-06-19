@@ -322,7 +322,7 @@ This experiment further confirms that \cpmdiff\ can calibrate both space-based a
 \subsection{\KTCN\ real data}
 Now we test our method on a $64\times50$ pixel patch (\epic\ 200069960) from \KTCN\footnote{\url{https://keplerscience.arc.nasa.gov/k2-c9.html}}\citep{k2c9}, which was dedicated to a study of gravitational microlensing events.
 This data set is an ideal test bed for difference imaging, since it observed a very crowded field near the bulge, where high precision photometry is difficult to achieve directly.
-\cite{wei} has already applied \class\ on this data set and is able to model some microlensing events.
+\cite{wei} has already applied the classical difference imaging on this data set and is able to model some microlensing events.
 
 Fig.~\ref{k2c9} shows three snapshots of the data and the \cpmdiff\ of different times.
 Constant sources in the dense field were almost all cancelled with the \cpm\ prediction, while variables (located at the white crosshairs) were preserved and can even be picked by eye from the difference image.
@@ -465,28 +465,28 @@ However, from the experiment, moderate PRF variations are still acceptable.
 }
 \end{figure}
 
-\section{Discussion}It has been demonstrated that the \cpmdiff\ is able to predict the image with precision close to the photon noise, while preserve the variable sources with both space-based and ground-based data with moderate pointing, rotation and PSF variations. 
+\section{Discussion}We have demonstrated that \cpmdiff\ is capable of predicting images with precision close to the photon noise, while preserving the variable sources. We have shown this with simulated data comparable to typical space-based and ground-based data with moderate pointing, rotation and PSF variations. 
 Here we list few reasons \cpmdiff\ may be preferred over other methods:
 
 \begin{enumerate}
-\item All \class\ approachs require precise image registration as a priori step. 
+\item All classical difference imaging approaches require precise image registration as a priori step. 
 Any astrometric alignment error between image frames will lead to imperfection of subtraction.
 In comparison, the precision requirement of registration is largely relaxed in \cpmdiff. 
 As demonstrated in Section \ref{limits}, with pointing variation smaller than $\sim$1 FWHM of PSF, precision close to photon noise can still be achieved by our method.  
 
-\item All \class\ approcahs require direct or indirect information of the PSF. 
-\cite{imagesub1}, \cite{alard} and \cite{bramich} model the difference of PSFs between images by solving the convolution kernel.
-In \cite{optimal}, both PSFs of reference and new images need to be known explicitly.
+\item All classical difference imaging approaches require accurate direct or indirect information about the PSF. 
+\cite{imagesub1}, \cite{alard} and \cite{bramich} model the difference of PSFs between images by solving for a convolution kernel.
+In \cite{optimal}, both PSFs of the reference and the new images need to be known explicitly.
 Any imperfection of the PSF(or difference of PSFs) estimation will lead to subtraction residuals.
-\cpmdiff\ avoids PSF estimation, since there is no convolution kernel in subtraction.
+\cpmdiff\ avoids PSF estimation, since there is no convolution kernel involved, even implicitly.
 
 \item For photometry, de-trending process may also be required after image subtraction in the classical approach to account for extra variabilities induced by intra-and inter-pixel variations.
 In comparison, \cpmdiff\ mitigates these effects internally.
 \end{enumerate}
 
-Although \cpmdiff\ performances impressively in the paper,  in order to fully exploit the potential of the method, it is still essential to find an optimal set of hyper-parameters and optimize the selection of predictors as mentioned in Section \ref{method}. 
+Although \cpmdiff\ performs impressively in this paper,  in order to fully exploit the potential of the method, it is still important to find a good set of hyper-parameters and optimize the selection of predictors as mentioned in Section \ref{method}. 
 In the original \cpm, there are two hyper-parameters---the number of predictor pixels N and the strength of the L2-regularization $\lambda_a$, which can be optimized by cross-validation. 
-However, the selection or ranking of the predictor pixels are intuitively defined by either using the closest pixels in space or in brightness.
+However, the selection or ranking of the predictor pixels have been intuitively defined here by either using the closest pixels in space or in brightness.
 This intuitive setting is neither fully tested nor optimal, so exploring how to filter or select predictor pixels are necessary to achieve better performance of the model.
 There are many ways worth trying to improve the selection of predictors.
 For example, one can filter the predictor pixels by variability of the pixel.
