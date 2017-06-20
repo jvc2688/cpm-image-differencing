@@ -128,9 +128,9 @@ Since the model of the image is built from itself, there is no need to measure t
 Finally, while in the classical approach only two images are compared with each other to measure the difference of PSFs, in \cpmdiff\ all other images are used together to learn the coefficients, which describe how pixels are related to one another.
 The benefits from the proposed method in this paper can be listed as: 
 \begin{enumerate}
-\item the method capitalizes on a huge set of images, not just a single reference image. 
-\item no knowledge of the detailed pointing or PSF of any frame is required. 
-\item this method is perfectly good on under-sampled imaging
+\item The method capitalizes on a huge set of images, not just a single reference image. 
+\item No knowledge of the detailed pointing or PSF of any frame is required. 
+\item This method is perfectly good on under-sampled imaging
 \end{enumerate}
 
 \todo{model the whole sky:DWH}
@@ -483,6 +483,11 @@ Any imperfection of the PSF(or difference of PSFs) estimation will lead to subtr
 \item For photometry, de-trending process may also be required after image subtraction in the classical approach to account for extra variabilities induced by intra-and inter-pixel variations.
 In comparison, \cpmdiff\ mitigates these effects internally.
 \end{enumerate}
+
+Apart from these benefits from the method, we still want to emphasize that \cpmdiff\ has its own scope of applicability.
+The method requires enough images and pixels to optimize the model, so it can not be used in a situation, where  there are very few images or the size of the image is too small. 
+From Section \ref{limits}, we learned that although \cpmdiff\ does not require perfect knowledge of pointing or PSF, it is important to ensure the registration to be good within $\sim$1 FWHM of PSF for best performance.
+In addition, PSF variations between frames should also be moderate, so that the correlation between pixels are approximately the same.
 
 Although \cpmdiff\ performs impressively in this paper,  in order to fully exploit the potential of the method, it is still important to find a good set of hyper-parameters and optimize the selection of predictors as mentioned in Section \ref{method}. 
 In the original \cpm, there are two hyper-parameters---the number of predictor pixels N and the strength of the L2-regularization $\lambda_a$, which can be optimized by cross-validation. 
